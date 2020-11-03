@@ -1,0 +1,5 @@
+config.json
+ffmpeg
+*.mp3
+*.pyc
+*.txt
