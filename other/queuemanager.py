@@ -1,5 +1,4 @@
 
-from asyncio.windows_events import NULL
 
 queueDictionary = dict()
 
@@ -8,23 +7,23 @@ def GetAndPopNextItem(guild):
     if guild in queueDictionary:
         if not queueDictionary[guild]:
             queueDictionary.pop(guild)
-            return NULL
+            return 0
         else:
             nextItem = queueDictionary[guild].pop(0)
             return nextItem
     else:
-        return NULL
+        return 0
 
 def GetNextItem(guild):
     if guild in queueDictionary:
         if not queueDictionary[guild]:
             queueDictionary.pop(guild)
-            return NULL
+            return 0
         else:
             nextItem = queueDictionary[guild][0]
             return nextItem
     else:
-        return NULL
+        return 0
 
 def Add(guild,songData):
     if guild in queueDictionary:

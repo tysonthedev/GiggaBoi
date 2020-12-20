@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from operator import truediv
 import time
 import discord
@@ -114,7 +113,7 @@ async def stop(ctx):
 
 def playNextSong(voiceClient,ctx):
     print("PLAYING NEXT SONG FUNCTION")
-    if queuemanager.GetNextItem(str(ctx.guild.id)) == NULL:
+    if queuemanager.GetNextItem(str(ctx.guild.id)) == 0:
         print("QUEUE FOR GUILD:" + str(str(ctx.guild.id)) + " IS EMPTY")
     else:
         print("PLAYING NEXT SONG")
