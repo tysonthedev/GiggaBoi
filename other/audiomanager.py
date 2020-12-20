@@ -8,7 +8,7 @@ import shutil
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 print(__location__)
-libraryFilePath = os.path.dirname(__location__) + '\locallibrary'
+libraryFilePath = os.path.dirname(__location__) + '/locallibrary'
 
 def PlayAudioClip(whateverAudioClip, serverGuild):
     if '/' in whateverAudioClip:
@@ -18,9 +18,9 @@ def PlayAudioClip(whateverAudioClip, serverGuild):
 
 def GetLocalLibraryList(serverGuild):
     directoryList = os.listdir(libraryFilePath)
-    listFile = open(__location__ + "\\" + serverGuild + "locallibrarylist.txt", "w")
+    listFile = open(__location__ + "/" + serverGuild + "locallibrarylist.txt", "w")
     for filename in directoryList:
-        listFile.write(filename + '\n')
+        listFile.write(filename + '/n')
     listFile.close()
     return listFile.name
 
@@ -28,11 +28,11 @@ def GetLocalAudioClip(searchTerm, serverGuild):
     directoryList = os.listdir(libraryFilePath)
     for libraryItem in directoryList:
         if(searchTerm.upper() == libraryItem[0:len(libraryItem) - 4].upper()):
-            return discord.FFmpegPCMAudio(libraryFilePath + '\\' + libraryItem)
-    return discord.FFmpegPCMAudio(libraryFilePath + '\\' + 'error.mp3')
+            return discord.FFmpegPCMAudio(libraryFilePath + '/' + libraryItem)
+    return discord.FFmpegPCMAudio(libraryFilePath + '/' + 'error.mp3')
 
 def GetYoutubeAudioClip(url, serverGuild):
-    tempFilePath = os.path.dirname(__location__) + '\\' + serverGuild + '.mp3'
+    tempFilePath = os.path.dirname(__location__) + '/' + serverGuild + '.mp3'
     ytdlOptions = {
         'format': 'bestaudio',
         'extractaudio': True,
