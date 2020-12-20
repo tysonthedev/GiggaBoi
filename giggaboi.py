@@ -56,15 +56,15 @@ async def connect(ctx: Context):
 @client.command()
 async def disconnect(ctx:Context):
     await connectionmanager.disconnect(client,ctx, False)
-    queuemanager.Clear(ctx.guild)
+    queuemanager.Clear(str(ctx.guild.id))
     
 @client.command()
 async def killconnections(ctx):
     await connectionmanager.closeAllConnection(client)
 
-@client.command(name="listlibrary",help="Gives a file listing the local library")
-async def listlibrary(ctx:Context):
-    await ctx.channel.send("Library List",file=File(open(audiomanager.GetLocalLibraryList(),"rb"),"library_list.txt"))
+@client.command(name="library",help="Gives a file listing the local library")
+async def library(ctx:Context):
+    await ctx.channel.send("Library List",file=File(open(audiomanager.GetLocalLibraryList(str(ctx.guild.id)),"rb"),"library_list.txt"))
 
 @client.command()
 async def play(ctx, *,args):
@@ -73,13 +73,13 @@ async def play(ctx, *,args):
     connectionStatus = resultTuple[0]
 
     if connectionStatus == ConnectionStatus.connectedNow:
-        voiceClient.play(audiomanager.PlayAudioClip(args),after=lambda x: playNextSong(voiceClient,ctx))
+        voiceClient.play(audiomanager.PlayAudioClip(args,str(ctx.guild.id)),after=lambda x: playNextSong(voiceClient,ctx))
     elif connectionStatus == ConnectionStatus.alreadyConnected:
         if voiceClient.is_playing() or voiceClient.is_paused():
             print("bot is already playing audio will add song to the queue")
-            queuemanager.Add(ctx.guild,args)
+            queuemanager.Add(str(ctx.guild.id),args)
         else:            
-            voiceClient.play(audiomanager.PlayAudioClip(args),after=lambda x: playNextSong(voiceClient,ctx))
+            voiceClient.play(audiomanager.PlayAudioClip(args, str(ctx.guild.id)),after=lambda x: playNextSong(voiceClient,ctx))
     elif connectionStatus == ConnectionStatus.connectedToAnotherChannel:
         if voiceClient.is_playing() == False and voiceClient.is_paused() == False:
             print("bot is connected to another channel and isn't playing audio \nIt will now disconnect and connect to the correct voice channel!")
@@ -87,7 +87,7 @@ async def play(ctx, *,args):
             resultTuple = await connectionmanager.connect(client,ctx, True)
             voiceClient = resultTuple[1]
             connectionStatus = resultTuple[0]
-            voiceClient.play(audiomanager.PlayAudioClip(args),after=lambda x: playNextSong(voiceClient,ctx))
+            voiceClient.play(audiomanager.PlayAudioClip(args,str(ctx.guild.id)),after=lambda x: playNextSong(voiceClient,ctx))
         else:
             print("bot is currently connected to another channel and playing audio \n Audio will not be played in this channel and won't be added to the queue")
 
@@ -104,17 +104,21 @@ async def resume(ctx):
     connectionmanager.getVoiceClient(client,ctx).resume()
 
 @client.command()
+async def queue(ctx):
+    await ctx.send(queuemanager.queueDictionary[str(ctx.guild.id)])
+
+@client.command()
 async def stop(ctx):
-    queuemanager.Clear(ctx.guild)
+    queuemanager.Clear(str(ctx.guild.id))
     connectionmanager.getVoiceClient(client,ctx).stop()
 
 def playNextSong(voiceClient,ctx):
     print("PLAYING NEXT SONG FUNCTION")
-    if queuemanager.GetNextItem(ctx.guild) == NULL:
-        print("QUEUE FOR GUILD:" + str(ctx.guild) + " IS EMPTY")
+    if queuemanager.GetNextItem(str(ctx.guild.id)) == NULL:
+        print("QUEUE FOR GUILD:" + str(str(ctx.guild.id)) + " IS EMPTY")
     else:
         print("PLAYING NEXT SONG")
-        voiceClient.play(audiomanager.PlayAudioClip(queuemanager.GetAndPopNextItem(ctx.guild)),after=lambda x: playNextSong(voiceClient,ctx))
+        voiceClient.play(audiomanager.PlayAudioClip(queuemanager.GetAndPopNextItem(str(ctx.guild.id)),str(ctx.guild.id)),after=lambda x: playNextSong(voiceClient,ctx))
 #will eventually move to messagemanager
 async def gilfoylesayshi(user:discord.user):
     for voiceClient in client.voice_clients:
