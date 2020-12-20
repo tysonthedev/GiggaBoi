@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import os
 import discord
 from discord.client import Client
@@ -28,7 +27,7 @@ async def connect(client:Client, ctx:Context, forceConnect):
                     return (ConnectionStatus.connectedNow,voiceClient)
             if ctx.author.voice == None:
                 print("User isn't connected to a voice channel")
-                return (ConnectionStatus.userNotConnected,NULL)
+                return (ConnectionStatus.userNotConnected,0)
             elif ctx.author.voice.channel == voiceClient.channel:
                 print("already connected")
                 return (ConnectionStatus.alreadyConnected,voiceClient)
@@ -43,16 +42,16 @@ async def disconnect(client:Client, ctx:Context, forceDisconnect):
             if voiceClient.guild == ctx.author.guild:
                 if forceDisconnect:
                     await voiceClient.disconnect()
-                    return (ConnectionStatus.disconnectedNow, NULL)
+                    return (ConnectionStatus.disconnectedNow, 0)
                 elif ctx.author.voice == None:
                     print("User isn't connected to a voice channel")
-                    return (ConnectionStatus.userNotConnected, NULL)
+                    return (ConnectionStatus.userNotConnected, 0)
                 elif ctx.author.voice.channel != voiceClient.channel:
                     print("connected to another voice channel")
                     return (ConnectionStatus.connectedToAnotherChannel, voiceClient)
                 else:
                     await voiceClient.disconnect()
-                    return (ConnectionStatus.disconnectedNow, NULL)
+                    return (ConnectionStatus.disconnectedNow, 0)
 
 async def closeAllConnection(client:Client):
     print("Killing All Connections!")
@@ -65,9 +64,9 @@ def getVoiceClient(client:Client, ctx:Context):
         if voiceClient.guild == ctx.author.guild:
             if ctx.author.voice == None:
                 print("User isn't connected to a voice channel")
-                return NULL
+                return 0
             elif ctx.author.voice.channel != voiceClient.channel:
                 print("connected to another voice channel")
-                return NULL
+                return 0
             else:
                 return voiceClient
