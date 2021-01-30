@@ -2,7 +2,10 @@ from operator import truediv
 import time
 import discord
 from discord import guild
+from discord import message
+from discord import permissions
 from discord.ext.commands.context import Context
+from discord.ext.commands.core import has_permissions
 from discord.player import FFmpegAudio, FFmpegPCMAudio
 from discord.voice_client import VoiceClient
 import nacl
@@ -27,6 +30,7 @@ configFile = open(os.path.join(__location__, 'config.json'))
 jsonConfig = json.loads(configFile.read())
 TOKEN = jsonConfig['TOKEN']
 client = Bot(command_prefix='\\')
+permissionErrorMessage = "You don't have permission to run this command"
 
 @client.event
 async def on_ready():
@@ -42,31 +46,32 @@ async def on_message(message:discord.Message):
     #this will all eventually move to messagemanager
         print (message.content.upper())
         if 'POTATO' in message.content.upper():
+            message.aut
             await message.channel.send(messagemanager.ReplaceAllOccurences(message.content,'potato','PotAHto'))
         if "TOMATO" in message.content.upper():
-            await message.channel.send("TomAHto")        
+            await message.channel.send(messagemanager.ReplaceAllOccurences(message.content,'tomato','TomAHto'))
         if 'BITCOIN' in message.content.upper():
-            await gilfoylesayshi(message.author)   
+            await gilfoylesayshi(message.author)
 
-@client.command()
+@client.command(name="connect",help="Connects GiggaBoi to the voice server you are in")
 async def connect(ctx: Context):
     await connectionmanager.connect(client,ctx, False)
 
-@client.command()
+@client.command(name="disconnect",help="Disconnects GiggaBoi from the voice server you are in")
 async def disconnect(ctx:Context):
     await connectionmanager.disconnect(client,ctx, False)
     queuemanager.Clear(str(ctx.guild.id))
     
-@client.command()
-async def killconnections(ctx):
+@client.command(name="killconnections",help="Kills all instances of GiggaBoi cross server")
+async def killconnections(ctx:Context):
     await connectionmanager.closeAllConnection(client)
 
 @client.command(name="library",help="Gives a file listing the local library")
 async def library(ctx:Context):
     await ctx.channel.send("Library List",file=File(open(audiomanager.GetLocalLibraryList(str(ctx.guild.id)),"rb"),"library_list.txt"))
 
-@client.command()
-async def play(ctx, *,args):
+@client.command(name="play", help="Plays audio. local file/link example:\play <name of file or url>. youtube search example: \play /<search>")
+async def play(ctx:Context, *,args):
     resultTuple = await connectionmanager.connect(client,ctx, False)
     voiceClient = resultTuple[1]
     connectionStatus = resultTuple[0]
@@ -90,26 +95,56 @@ async def play(ctx, *,args):
         else:
             print("bot is currently connected to another channel and playing audio \n Audio will not be played in this channel and won't be added to the queue")
 
-@client.command()
-async def skip(ctx):
+@client.command(name="skip", help="Skips current audio")
+async def skip(ctx:Context):
     connectionmanager.getVoiceClient(client,ctx).stop()
 
-@client.command()
-async def pause(ctx):
+@client.command(name="pause", help="Pauses current audio")
+async def pause(ctx:Context):
     connectionmanager.getVoiceClient(client,ctx).pause()
 
-@client.command()
-async def resume(ctx):
+@client.command(name="resume", help="Resumes current audio")
+async def resume(ctx:Context):
     connectionmanager.getVoiceClient(client,ctx).resume()
 
-@client.command()
-async def queue(ctx):
-    await ctx.send(queuemanager.queueDictionary[str(ctx.guild.id)])
+@client.command(name="queue", help="Prints out the current queue(JSON)")
+async def queue(ctx:Context):
+    if(queuemanager.queueDictionary):
+        if(str(ctx.guild.id) in queuemanager.queueDictionary):
+            await ctx.send(queuemanager.queueDictionary[str(ctx.guild.id)])
+            return
+    await ctx.send("queue is empty")
 
-@client.command()
-async def stop(ctx):
+@client.command(name="stop", help="Stops current audio and empties the queue")
+async def stop(ctx:Context):
     queuemanager.Clear(str(ctx.guild.id))
     connectionmanager.getVoiceClient(client,ctx).stop()
+
+@client.command(name="addattached", help="(admins only) Adds the mp3 file you attach to the local library with the title you give it. example: \\addattached <name you want to give it> and also attach your mp3")
+@has_permissions(administrator=True)
+async def addattached(ctx:Context, * ,args ):
+    if(ctx.message.attachments):
+        if(".mp3" in ctx.message.attachments[0].filename):
+            await audiomanager.AddToLocal(ctx.message.attachments[0],args + ".mp3")
+        else:
+            await ctx.send("please attach an mp3 file")
+            return
+    else:
+        await ctx.send("please attach an mp3 file")
+        return
+    return
+@addattached.error
+async def addattachedError(ctx,error):
+    await ctx.send(permissionErrorMessage)
+
+#@client.command(name="addcurrent", help="(admins only) Adds the mp3 that is currently being placed to the local library with a title you give it. example: \\addcurrent <name you want to give it>")
+#async def addcurrent(ctx:Context):
+#    return
+
+@client.command(name="removelocal", help="(admins only) Removes a local file from the local library example: \\removelocal <name of file to remove>")
+async def removelocal(ctx:Context,*,args):
+    await audiomanager.RemoveFromLocal(args)
+    return
 
 def playNextSong(voiceClient,ctx):
     print("PLAYING NEXT SONG FUNCTION")
@@ -118,6 +153,7 @@ def playNextSong(voiceClient,ctx):
     else:
         print("PLAYING NEXT SONG")
         voiceClient.play(audiomanager.PlayAudioClip(queuemanager.GetAndPopNextItem(str(ctx.guild.id)),str(ctx.guild.id)),after=lambda x: playNextSong(voiceClient,ctx))
+
 #will eventually move to messagemanager
 async def gilfoylesayshi(user:discord.user):
     for voiceClient in client.voice_clients:
