@@ -4,8 +4,9 @@ import discord
 from discord import guild
 from discord import message
 from discord import permissions
+from discord.ext import commands
+from discord.ext.commands import has_permissions
 from discord.ext.commands.context import Context
-from discord.ext.commands.core import has_permissions
 from discord.player import FFmpegAudio, FFmpegPCMAudio
 from discord.voice_client import VoiceClient
 import nacl
@@ -121,7 +122,7 @@ async def stop(ctx:Context):
     connectionmanager.getVoiceClient(client,ctx).stop()
 
 @client.command(name="addattached", help="(admins only) Adds the mp3 file you attach to the local library with the title you give it. example: \\addattached <name you want to give it> and also attach your mp3")
-@has_permissions(administrator=True)
+@commands.has_permissions(administrator=True)
 async def addattached(ctx:Context, * ,args ):
     if(ctx.message.attachments):
         if(".mp3" in ctx.message.attachments[0].filename):
@@ -142,6 +143,7 @@ async def addattachedError(ctx,error):
 #    return
 
 @client.command(name="removelocal", help="(admins only) Removes a local file from the local library example: \\removelocal <name of file to remove>")
+@commands.has_permissions(administrator=True)
 async def removelocal(ctx:Context,*,args):
     await audiomanager.RemoveFromLocal(args)
     return
