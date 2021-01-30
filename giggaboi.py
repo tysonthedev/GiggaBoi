@@ -63,10 +63,13 @@ async def disconnect(ctx:Context):
     await connectionmanager.disconnect(client,ctx, False)
     queuemanager.Clear(str(ctx.guild.id))
     
-@client.command(name="killconnections",help="Kills all instances of GiggaBoi cross server")
+@client.command(name="killconnections",help="(admins only) Kills all instances of GiggaBoi cross server")
+@commands.has_permissions(administrator=True)
 async def killconnections(ctx:Context):
     await connectionmanager.closeAllConnection(client)
-
+@killconnections.error
+async def killconnectionserror(ctx,error):
+    await ctx.send(permissionErrorMessage)
 @client.command(name="library",help="Gives a file listing the local library")
 async def library(ctx:Context):
     await ctx.channel.send("Library List",file=File(open(audiomanager.GetLocalLibraryList(str(ctx.guild.id)),"rb"),"library_list.txt"))
@@ -147,7 +150,9 @@ async def addattachedError(ctx,error):
 async def removelocal(ctx:Context,*,args):
     await audiomanager.RemoveFromLocal(args)
     return
-
+@removelocal.error
+async def removelocalError(ctx,error):
+    await ctx.send(permissionErrorMessage)
 def playNextSong(voiceClient,ctx):
     print("PLAYING NEXT SONG FUNCTION")
     if queuemanager.GetNextItem(str(ctx.guild.id)) == 0:
