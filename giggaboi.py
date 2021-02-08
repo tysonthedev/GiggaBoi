@@ -74,7 +74,7 @@ async def killconnectionserror(ctx,error):
 async def library(ctx:Context):
     await ctx.channel.send("Library List",file=File(open(audiomanager.GetLocalLibraryList(str(ctx.guild.id)),"rb"),"library_list.txt"))
 
-@client.command(name="play", help="Plays audio. local file/link example:\play <name of file or url>. youtube search example: \play /<search>")
+@client.command(name="play", help="Plays audio. example:\play <name of file, url, or search term>")
 async def play(ctx:Context, *,args):
     resultTuple = await connectionmanager.connect(client,ctx, False)
     voiceClient = resultTuple[1]
