@@ -42,6 +42,8 @@ def GetLocalAudioClip(searchTerm, serverGuild):
                     os.remove(tempFilePath)
                 shutil.copyfile(libraryFilePath + '/' + libraryItem,tempFilePath)
                 return(discord.FFmpegPCMAudio(tempFilePath))
+        else:
+            return(GetYoutubeAudioClip(searchTerm, serverGuild))
     return discord.FFmpegPCMAudio(libraryFilePath + '/' + 'error.mp3')
 
 def GetYoutubeAudioClip(url, serverGuild):
