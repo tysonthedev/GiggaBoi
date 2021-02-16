@@ -8,7 +8,7 @@ import shutil
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 print(__location__)
-libraryFilePath = os.path.dirname(__location__) + '/locallibrary'
+libraryFilePath = os.path.dirname(__location__) + '\locallibrary'
 
 def PlayAudioClip(whateverAudioClip, serverGuild):
     if '/' in whateverAudioClip:
@@ -18,36 +18,35 @@ def PlayAudioClip(whateverAudioClip, serverGuild):
 
 def GetLocalLibraryList(serverGuild):
     directoryList = os.listdir(libraryFilePath)
-    listFile = open(__location__ + "/" + serverGuild + "locallibrarylist.txt", "w")
+    listFile = open(__location__ + "\\" + serverGuild + "locallibrarylist.txt", "w")
     for filename in directoryList:
         listFile.write(filename + '\n')
     listFile.close()
     return listFile.name
 
 async def AddToLocal(discordAttachment:discord.Attachment, nameOfFile):
-    await discordAttachment.save(libraryFilePath + "/" + nameOfFile)
+    await discordAttachment.save(libraryFilePath + "\\" + nameOfFile)
     return
 
 async def RemoveFromLocal(nameOfFile):
-    if(os.path.exists(libraryFilePath + "/" + nameOfFile + ".mp3")):
-        os.remove(libraryFilePath + "/" + nameOfFile + ".mp3")
+    if(os.path.exists(libraryFilePath + "\\" + nameOfFile + ".mp3")):
+        os.remove(libraryFilePath + "\\" + nameOfFile + ".mp3")
     return
 
 def GetLocalAudioClip(searchTerm, serverGuild):
-    tempFilePath = os.path.dirname(__location__) + '/' + serverGuild + '.mp3'
+    tempFilePath = os.path.dirname(__location__) + '\\' + serverGuild + '.mp3'
     directoryList = os.listdir(libraryFilePath)
     for libraryItem in directoryList:
         if(searchTerm.upper() == libraryItem[0:len(libraryItem) - 4].upper()):
                 if(os.path.exists(tempFilePath)):
                     os.remove(tempFilePath)
-                shutil.copyfile(libraryFilePath + '/' + libraryItem,tempFilePath)
+                shutil.copyfile(libraryFilePath + '\\' + libraryItem,tempFilePath)
                 return(discord.FFmpegPCMAudio(tempFilePath))
-        else:
-            return(GetYoutubeAudioClip(searchTerm, serverGuild))
-    return discord.FFmpegPCMAudio(libraryFilePath + '/' + 'error.mp3')
+    return(GetYoutubeAudioClip(searchTerm, serverGuild))
+    return discord.FFmpegPCMAudio(libraryFilePath + '\\' + 'error.mp3')
 
 def GetYoutubeAudioClip(url, serverGuild):
-    tempFilePath = os.path.dirname(__location__) + '/' + serverGuild + '.mp3'
+    tempFilePath = os.path.dirname(__location__) + '\\' + serverGuild + '.mp3'
     ytdlOptions = {
         'format': 'bestaudio',
         'extractaudio': True,
